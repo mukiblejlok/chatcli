@@ -1,0 +1,5 @@
+python-dotenv
+rich
+openai
+prompt_toolkit
+textual
