@@ -24,7 +24,7 @@ prompt_style = Style.from_dict(
     }
 )
 
-MODEL = 'gpt-4'
+MODEL = "gpt-4o"
 SESSION_START_ID = datetime.now().strftime("%Y%m%d%H%M%S")
 CHAT_RESULTS_FOLDER = Path(__file__).parent / "CHAT_RESULTS"
 
