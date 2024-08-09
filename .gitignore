@@ -186,6 +186,6 @@ dmypy.json
 cython_debug/
 
 #
-.open*.json
 .open*.txt
 /DALLE_RESULTS
+/CHAT_RESULTS
