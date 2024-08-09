@@ -1,0 +1,20 @@
+Screen {
+    layout: grid;
+    grid-size: 1 2;
+}
+
+Prompt {
+    border: blank;
+}
+
+Prompt:hover {
+    border: wide $secondary;
+}
+
+Prompt:focus {
+    border: wide $accent;
+}
+
+Chat {
+    background: red;
+}
