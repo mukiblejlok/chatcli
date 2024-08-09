@@ -185,3 +185,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+#
+.open*.json
+.open*.txt
+/DALLE_RESULTS

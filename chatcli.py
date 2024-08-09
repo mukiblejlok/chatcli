@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import json
+import logging
 import os
 import sys
 from datetime import datetime, timezone
@@ -20,13 +22,22 @@ prompt_style = Style.from_dict({
     'pr': '#884444',
 })
 
+MODEL = 'gpt-4'
+SESSION_START_ID = datetime.now().strftime("%Y%m%d%H%M%S")
+
+
+def store_messages(messages):
+    p = Path(__file__).parent / f".openapi_chat_{SESSION_START_ID}.json"
+    p.write_text(json.dumps(messages))
+    return None
+
 
 def cli() -> int:
     console = Console(width=120)
-    console.print(f'ChatCLI - OpenAI powered ChatCLI', style='blue bold', highlight=False)
+    console.print(f'ChatCLI - OpenAI powered ChatCLI - {MODEL}', style='blue bold', highlight=False)
 
     try:
-        openai.api_key = os.environ['OPENAI_API_KEY']
+        client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     except KeyError:
         console.print('You must set the OPENAI_API_KEY environment variable', style='red')
         return 1
@@ -38,11 +49,13 @@ The current date and time is {datetime.now()} {now_utc.astimezone().tzinfo.tznam
 """
     messages = [{'role': 'system', 'content': setup}]
 
-    history = Path().home() / '.openai-prompt-history.txt'
+    history = Path(__file__).parent / '.openai-prompt-history.txt'
     session = PromptSession(history=FileHistory(str(history)))
+    logging.basicConfig()
 
     while True:
         try:
+            store_messages(messages=messages)
             text = session.prompt([("class:pr", "chatcli ➤ ")], auto_suggest=AutoSuggestFromHistory(),
                                   style=prompt_style)
         except (KeyboardInterrupt, EOFError):
@@ -56,7 +69,7 @@ The current date and time is {datetime.now()} {now_utc.astimezone().tzinfo.tznam
         messages.append({'role': 'user', 'content': text})
 
         try:
-            response = openai.ChatCompletion.create(model='gpt-4', messages=messages, stream=True)
+            response = client.chat.completions.create(model=MODEL, messages=messages, stream=True)
         except KeyboardInterrupt:
             status.stop()
             return 0
@@ -65,11 +78,12 @@ The current date and time is {datetime.now()} {now_utc.astimezone().tzinfo.tznam
         content = ''
         markdown = Markdown(content)
         try:
-            with Live(markdown, refresh_per_second=15, console=console) as live:
+            with Live(markdown, refresh_per_second=5, console=console) as live:
                 for chunk in response:
-                    if chunk['choices'][0]['finish_reason'] is not None:
+                    first_choice = chunk.choices[0]
+                    if first_choice.finish_reason is not None:
                         break
-                    chunk_text = chunk['choices'][0]['delta'].get('content', '')
+                    chunk_text = first_choice.delta.content if first_choice.delta.content else ''
                     content += chunk_text
                     live.update(Markdown(content))
         except KeyboardInterrupt:
