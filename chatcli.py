@@ -26,10 +26,11 @@ prompt_style = Style.from_dict(
 
 MODEL = "gpt-4o"
 SESSION_START_ID = datetime.now().strftime("%Y%m%d%H%M%S")
-CHAT_RESULTS_FOLDER = Path(__file__).parent / "CHAT_RESULTS"
+RESULTS_FOLDER = Path(__file__).parent / "CHAT_RESULTS"
+RESULTS_FOLDER.mkdir(exist_ok=True, parents=True)
 
 
-def store_messages(messages, folder: Path = CHAT_RESULTS_FOLDER) -> None:
+def store_messages(messages, folder: Path = RESULTS_FOLDER) -> None:
     p = folder / f".openai_chat_{SESSION_START_ID}.json"
     p.write_text(json.dumps(messages))
     return None
